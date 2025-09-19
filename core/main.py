@@ -1,6 +1,7 @@
 from fastapi import FastAPI, status, HTTPException, Path
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, Response
 from pydantic import BaseModel
+from typing import Optional
 import random
 
 app = FastAPI()
@@ -52,6 +53,7 @@ def edit_payment(
     payment_id: int = Path(title="Payment ID", description="The ID of the Payment"),
     payment: PaymentUpdate = None,               
 ):
+    """This api for returning updated object"""
     if payment_id not in data:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Payment not found")
     
@@ -63,5 +65,43 @@ def edit_payment(
     
     
     
+class PaymentUpdate(BaseModel):
+    description: Optional[str] = None
+    amount: Optional[float] = None
 
-    
+
+
+
+
+
+class Payment(BaseModel):
+    description: str
+    amount: float
+
+@app.post("/payment/create/")
+def create_payment(payment: Payment):
+    """the endpoint creates a new payment and stores it in the 'data' dictionary"""
+   
+    new_id = random.randint(3, 99)
+    data[new_id] = {"description": payment.description, "amount": payment.amount}
+
+    return JSONResponse(
+        content={
+            "message": "Payment created successfully",
+            "id": new_id,
+            "payment": data[new_id]
+        },
+        status_code=status.HTTP_201_CREATED
+    )
+
+
+
+
+
+@app.delete("/payment/{payment_id}")
+def delete_payment(payment_id: int):
+    if payment_id not in data:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Payment not found")
+
+    deleted = data.pop(payment_id)
+    return JSONResponse({"message": "Payment deleted successfully", "deleted_payment": deleted}, status_code=status.HTTP_204_NO_CONTENT)

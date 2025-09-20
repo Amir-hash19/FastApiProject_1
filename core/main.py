@@ -4,6 +4,11 @@ from pydantic import BaseModel
 from typing import Optional
 import random
 
+
+from schemas import PaymentCreateSchema, PaymentUpdateSchema
+
+
+
 app = FastAPI()
 
 data = {
@@ -50,8 +55,7 @@ class PaymentUpdate(BaseModel):
 
 @app.put("/payments/{payment_id}")
 def edit_payment(
-    payment_id: int = Path(title="Payment ID", description="The ID of the Payment"),
-    payment: PaymentUpdate = None,               
+    payment: PaymentUpdateSchema, payment_id: int = Path(title="Payment ID", description="The ID of the Payment"),
 ):
     """This api for returning updated object"""
     if payment_id not in data:
@@ -74,12 +78,12 @@ class PaymentUpdate(BaseModel):
 
 
 
-class Payment(BaseModel):
-    description: str
-    amount: float
+# class Payment(BaseModel):
+#     description: str
+#     amount: float
 
 @app.post("/payment/create/")
-def create_payment(payment: Payment):
+def create_payment(payment: PaymentCreateSchema):
     """the endpoint creates a new payment and stores it in the 'data' dictionary"""
    
     new_id = random.randint(3, 99)
@@ -88,8 +92,8 @@ def create_payment(payment: Payment):
     return JSONResponse(
         content={
             "message": "Payment created successfully",
-            "id": new_id,
-            "payment": data[new_id]
+            "description": payment.description,
+            "payment" : new_id
         },
         status_code=status.HTTP_201_CREATED
     )

@@ -11,7 +11,7 @@ class PaymentCreateSchema(BaseModel):
     def validate_amount_is_positive(cls, v):
         if v <= 0:
             raise ValueError("Amount must be positive")
-        return v
+        return 
     
 
 

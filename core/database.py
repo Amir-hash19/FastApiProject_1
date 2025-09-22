@@ -27,6 +27,8 @@ class User(Base):
     national_id = Column(Integer,nullable=False)
     updated_date = Column(DateTime(),default=datetime.now,onupdate=datetime.now)
 
+    payments = relationship("Payment", back_populates="user", cascade="all, delete-orphan")
+
 
     def __repr__(self):
         return f"<User(id={self.id}, email={self.email}, full_name={self.full_name})>"

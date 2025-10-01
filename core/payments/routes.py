@@ -35,7 +35,7 @@ async def retrieve_payment_list(
 
 
 
-@router.post("/payments", response_model=PaymentSchema)
+@router.post("/payment", response_model=PaymentSchema)
 async def create_payment(request: PaymentCreateSchema, db:Session = Depends(get_db), user: User = Depends(get_authenticated_user)):
     """this endpoint will create a payement object for user"""
     data = request.model_dump()

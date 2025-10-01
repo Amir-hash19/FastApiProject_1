@@ -1,0 +1,92 @@
+from core.auth.auth_jwt import generate_access_token, generate_refresh_token, decode_refresh_token
+from fastapi import FastAPI, status, HTTPException, Path, Request,Response,Depends,APIRouter
+from fastapi.responses import JSONResponse
+from core.users.models import User
+from core.payments.models import Payment
+from sqlalchemy.orm import Session
+from pydantic import BaseModel
+import random
+
+
+
+
+router = APIRouter(prefix="/api/v1")
+
+
+
+# @router.get("/payments")
+# def get_payments():
+
+#     """ This API return all of the payments in form of the json response """
+
+#     return JSONResponse(content=data, status_code=status.HTTP_200_OK)
+
+
+
+# @router.get("/payment/{payment_id}")
+# def retrieve_payment_detail(payment_id: int = Path(title="payment id"
+#                             ,description="The id of the Payment in data")):
+    
+#     """this endpoint takes payment id and return the values of that"""
+
+#     if payment_id in data:
+#         return data[payment_id]
+#     else:
+#         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Payment not found")
+
+
+
+
+# @router.put("/payments/{payment_id}")
+# def edit_payment(
+#     payment: PaymentUpdateSchema, payment_id: int = Path(title="Payment ID", description="The ID of the Payment"),
+# ):
+#     """This api for returning updated object"""
+#     if payment_id not in data:
+#         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Payment not found")
+    
+#     data[payment_id] = {
+#         "description": payment.description,
+#         "amount": payment.amount
+#     }
+#     return {"message":"Payment Updated successfully", "Payment":data[payment_id]}
+    
+    
+
+
+
+
+
+
+# # class Payment(BaseModel):
+# #     description: str
+# #     amount: float
+
+# @router.post("/payment/create/")
+# def create_payment(payment: PaymentCreateSchema):
+#     """the endpoint creates a new payment and stores it in the 'data' dictionary"""
+   
+#     new_id = random.randint(3, 99)
+#     data[new_id] = {"description": payment.description, "amount": payment.amount}
+
+#     return JSONResponse(
+#         content={
+#             "message": "Payment created successfully",
+#             "description": payment.description,
+#             "payment" : new_id
+#         },
+#         status_code=status.HTTP_201_CREATED
+#     )
+
+
+
+
+
+# @router.delete("/payment/{payment_id}")
+# def delete_payment(payment_id: int):
+#     if payment_id not in data:
+#         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Payment not found")
+
+#     deleted = data.pop(payment_id)
+#     return JSONResponse({"message": "Payment deleted successfully", "deleted_payment": deleted}, status_code=status.HTTP_204_NO_CONTENT)
+

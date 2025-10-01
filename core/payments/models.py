@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, ForeignKey, DateTime, Numeric
+from sqlalchemy import Column, Integer, ForeignKey, DateTime, Numeric, Text
 from sqlalchemy.orm import relationship
 from datetime import datetime
 from core.database import Base
@@ -11,6 +11,7 @@ class Payment(Base):
     user_id = Column(Integer, ForeignKey("users.id"))
     amount = Column(Numeric(10, 2))
     created_at = Column(DateTime, default=datetime.now)
+    description = Column(Text(500), nullable=True)
 
     user = relationship("User", back_populates="payments")
 

@@ -1,13 +1,13 @@
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from fastapi import HTTPException, status, Depends
 from datetime import datetime,timedelta, timezone
 from jwt import InvalidSignatureError, DecodeError
-from fastapi import Depends
-from fastapi import HTTPException, status
-import jwt
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.orm import Session
-from ..database import User, Payment
+from core.users.models import User
+from core.payments.models import Payment
 from ..config import settings
 from ..database import get_db
+import jwt
 
 
 security = HTTPBearer()
@@ -89,18 +89,6 @@ def decode_refresh_token(token):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,detail=f"Authentication failed, {e}")     
     
 
-
-
-
-
-# def get_authenticated_admin(user: UserModel = Depends(get_authenticated_user)):
-#     if user.user_type == UserType.ADMIN:
-#         return user
-
-#     raise HTTPException(
-#         status_code=status.HTTP_403_FORBIDDEN,
-#         detail="Forbidden access to endpoint",
-#     )
 
 
 

@@ -1,92 +1,127 @@
-from core.auth.auth_jwt import generate_access_token, generate_refresh_token, decode_refresh_token
-from fastapi import FastAPI, status, HTTPException, Path, Request,Response,Depends,APIRouter
+from core.auth.auth_jwt import generate_access_token, generate_refresh_token, decode_refresh_token,get_authenticated_user
+from fastapi import FastAPI, status, HTTPException, Path, Request,Response,Depends,APIRouter, Query
 from fastapi.responses import JSONResponse
 from core.users.models import User
 from core.payments.models import Payment
+from typing import List
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
+from core.database import get_db
 import random
 
-
-
+from .schemas import PaymentSchema, PaymentCreateSchema, PaymentUpdateSchema
 
 router = APIRouter(prefix="/api/v1")
 
 
 
-# @router.get("/payments")
-# def get_payments():
+@router.get("/payments", response_model=List[PaymentSchema])
+async def retrieve_payment_list(
+    db: Session = Depends(get_db),                    
+    user: User = Depends(get_authenticated_user),    
+    limit: int | None = Query(default=None,           
+                               description="limiting the number of items to retrieve")
+):
+    """this endpoint will return all of the user payments"""
+    query = db.query(Payment).filter(Payment.user_id == user.id)
 
-#     """ This API return all of the payments in form of the json response """
+    if limit:
+        query = query.limit(limit)
 
-#     return JSONResponse(content=data, status_code=status.HTTP_200_OK)
+    payments = query.all()
+    return payments    
 
 
 
-# @router.get("/payment/{payment_id}")
-# def retrieve_payment_detail(payment_id: int = Path(title="payment id"
-#                             ,description="The id of the Payment in data")):
+
+
+@router.post("/payments", response_model=PaymentSchema)
+async def create_payment(request: PaymentCreateSchema, db:Session = Depends(get_db), user: User = Depends(get_authenticated_user)):
+    """this endpoint will create a payement object for user"""
+    data = request.model_dump()
+    data.update({"user_id":user.id})
+    payment = Payment(**data)
+    db.add(payment)
+    db.commit()
+    db.refresh(payment)
+    return payment
+
+
+
+
+
+@router.get("/payments/{payment_id}", response_model=PaymentSchema)
+async def retrieve_payment(
+    payment_id: int ,
+    db: Session = Depends(get_db),           # پارامتر با مقدار پیش‌فرض
+    user: User = Depends(get_authenticated_user),  # پارامتر با مقدار پیش‌فرض
+                             
+):
+    payment_obj = db.query(Payment).filter(
+    Payment.id == payment_id,
+    Payment.user_id == user.id
+    ).first()
+
+    if not payment_obj:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Payment not found"
+        )
+    return payment_obj
     
-#     """this endpoint takes payment id and return the values of that"""
-
-#     if payment_id in data:
-#         return data[payment_id]
-#     else:
-#         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Payment not found")
 
 
 
 
-# @router.put("/payments/{payment_id}")
-# def edit_payment(
-#     payment: PaymentUpdateSchema, payment_id: int = Path(title="Payment ID", description="The ID of the Payment"),
-# ):
-#     """This api for returning updated object"""
-#     if payment_id not in data:
-#         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Payment not found")
-    
-#     data[payment_id] = {
-#         "description": payment.description,
-#         "amount": payment.amount
-#     }
-#     return {"message":"Payment Updated successfully", "Payment":data[payment_id]}
-    
+@router.delete("/payments/{payment_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_payment(
+    payment_id: int = Path(...,gt=0),
+    db: Session = Depends(get_db), 
+    user: User = Depends(get_authenticated_user)
+):
+    del_payment = db.query(Payment).filter(
+    Payment.id == payment_id,
+    Payment.user_id == user.id
+    ).first()
+
+    if not del_payment:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Payment not found"
+        )
+    db.delete(del_payment)
+    db.commit()
+    return JSONResponse(content={"detail":"Payment deleted Successfully"})
     
 
 
 
 
+@router.put("/payments/{payment_id}", response_model=PaymentSchema)
+async def update_payment(
+    payment_id: int,
+    payment_data: PaymentUpdateSchema,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_authenticated_user)
+):
+    """ updating an object element """
+    
+    payment_obj = db.query(Payment).filter(
+        Payment.id == payment_id,
+        Payment.user_id == user.id
+    ).first()
 
+    if not payment_obj:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Payment not found"
+        )
 
-# # class Payment(BaseModel):
-# #     description: str
-# #     amount: float
+    if payment_data.amount is not None:
+        payment_obj.amount = payment_data.amount
+    if payment_data.description is not None:
+        payment_obj.description = payment_data.description
 
-# @router.post("/payment/create/")
-# def create_payment(payment: PaymentCreateSchema):
-#     """the endpoint creates a new payment and stores it in the 'data' dictionary"""
-   
-#     new_id = random.randint(3, 99)
-#     data[new_id] = {"description": payment.description, "amount": payment.amount}
+    db.commit()
+    db.refresh(payment_obj)
 
-#     return JSONResponse(
-#         content={
-#             "message": "Payment created successfully",
-#             "description": payment.description,
-#             "payment" : new_id
-#         },
-#         status_code=status.HTTP_201_CREATED
-#     )
-
-
-
-
-
-# @router.delete("/payment/{payment_id}")
-# def delete_payment(payment_id: int):
-#     if payment_id not in data:
-#         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Payment not found")
-
-#     deleted = data.pop(payment_id)
-#     return JSONResponse({"message": "Payment deleted successfully", "deleted_payment": deleted}, status_code=status.HTTP_204_NO_CONTENT)
+    return payment_obj
 

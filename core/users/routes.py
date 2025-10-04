@@ -11,7 +11,7 @@ import random
 
 from .schemas import UserBaseSchema, UserloginSchema, DeleteAccountSchema
 
-router = APIRouter(prefix="/api/v1")
+router = APIRouter(prefix="/api/v1")    
 
 
 
@@ -47,28 +47,43 @@ async def user_register(request: UserBaseSchema,db:Session = Depends(get_db)):
 
 
 """this is an API for login and take an access token"""
-@router.post("/login")
-async def user_login(request: UserloginSchema, db: Session = Depends(get_db)):
-    try:
-        user_obj = (
-            db.query(User).filter_by(email=request.email.lower()).first()
-        )
-    except:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, detail="password is invalid"
-        )
-    if not user_obj or not user_obj.verify_password(request.password):
+
+@router.post("/login", status_code=status.HTTP_202_ACCEPTED)
+async def user_login(
+    request: UserloginSchema,
+    response: Response,
+    db: Session = Depends(get_db)
+):
+    
+    user = db.query(User).filter_by(email=request.email.lower()).first()
+
+    if not user or not user.verify_password(request.password):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid email or password",
+            detail="Invalid email or password"
         )
 
-    access_token = generate_access_token(user_obj.id)
 
-    return JSONResponse(
-        content={"detail": "logged in successfully", "access_token": access_token},status_code=status.HTTP_202_ACCEPTED
+    access_token = generate_access_token({"sub": str(user.id)})
+    refresh_token = generate_refresh_token({"sub": str(user.id)})
+
+ 
+    response.set_cookie(
+        key="refresh_token",
+        value=refresh_token,
+        httponly=True,       
+        secure=True,          
+        samesite="lax",       
+        max_age=7 * 24 * 60 * 60,  
+        path="/auth",         
     )
 
+
+    return {
+        "detail": "Login successful",
+        "access_token": access_token,
+        "token_type": "bearer"
+    }
 
 
 
@@ -88,15 +103,6 @@ def refresh(request: Request, response: Response, db: Session = Depends(get_db))
     new_refresh = generate_refresh_token(user.id)
 
 
-    response.set_cookie(
-        key="access_token",
-        value=new_access,
-        httponly=True,
-        secure=True,
-        samesite="lax",
-        max_age=300,
-        path="/"
-    )
     response.set_cookie(
         key="refresh_token",
         value=new_refresh,

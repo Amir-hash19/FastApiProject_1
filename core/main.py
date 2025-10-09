@@ -1,3 +1,4 @@
+from core.middlewares.i18n_middleware import LocalizationMiddleware
 from core.payments.routes import router as paymentsrouter
 from core.users.routes import router as usersrouter
 from fastapi import FastAPI
@@ -27,6 +28,7 @@ app = FastAPI(
     ],
 )
 
+app.add_middleware(LocalizationMiddleware)
 
 
 # اضافه کردن روت‌ها

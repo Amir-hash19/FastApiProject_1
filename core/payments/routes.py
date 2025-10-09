@@ -9,7 +9,8 @@ from pydantic import BaseModel
 from core.database import get_db
 import random
 
-from .schemas import PaymentSchema, PaymentCreateSchema, PaymentUpdateSchema
+from .schemas import  PaymentSchema ,PaymentCreateSchema, PaymentUpdateSchema, PaymentResponseSchema
+
 
 router = APIRouter(prefix="/api/v1")
 
@@ -35,16 +36,28 @@ async def retrieve_payment_list(
 
 
 
-@router.post("/payment", response_model=PaymentSchema)
-async def create_payment(request: PaymentCreateSchema, db:Session = Depends(get_db), user: User = Depends(get_authenticated_user)):
+@router.post("/payment", response_model=PaymentResponseSchema)
+async def create_payment(payment_data: PaymentCreateSchema, request:Request ,db:Session = Depends(get_db), user: User = Depends(get_authenticated_user)):
     """this endpoint will create a payement object for user"""
-    data = request.model_dump()
-    data.update({"user_id":user.id})
-    payment = Payment(**data)
-    db.add(payment)
-    db.commit()
-    db.refresh(payment)
-    return payment
+    _ = request.state.translations.gettext 
+    try:
+        data = payment_data.model_dump()
+        data.update({"user_id": user.id})
+        payment = Payment(**data)
+        db.add(payment)
+        db.commit()
+        db.refresh(payment)
+
+        return {
+            "message": _("Payment created successfully."),
+            "payment": payment,
+        }
+    except Exception:
+        db.rollback()
+        raise HTTPException(
+            status_code=500,
+            detail=_("Failed to create payment. Please try again later."),
+        )
 
 
 

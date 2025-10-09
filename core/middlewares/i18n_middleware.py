@@ -29,3 +29,6 @@ class LocalizationMiddleware(BaseHTTPMiddleware):
         response = await call_next(request)
         response.headers["Content-Language"] = lang
         return response
+
+
+        

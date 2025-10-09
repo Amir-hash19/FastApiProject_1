@@ -1,0 +1,13 @@
+Key Challenges & Tips for Multi-language (i18n) in FastAPI
+
+Language detection: From Accept-Language header, query param, or user settings.
+
+Translation management: .po/.mo files must be properly organized and compiled.
+
+Execution method: Choose between Middleware (global) or Dependency (per endpoint).
+
+Default language: Always have a fallback language.
+
+Messages & errors: All messages and errors should be translatable.
+
+Frontend coordination: User-selected language must be sent with every request.

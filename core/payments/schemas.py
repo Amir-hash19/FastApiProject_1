@@ -7,12 +7,22 @@ from typing import Optional
 
 
 
+
 class PaymentSchema(BaseModel):
-    id: int
+
     amount: Optional[Decimal] = None
     created_at: datetime
     description: Optional[str] = None
 
+
+
+
+class PaymentResponseSchema(BaseModel):
+    message: str
+    id: int
+    amount: Optional[Decimal] = None
+    created_at: datetime
+    description: Optional[str] = None
 
 
 

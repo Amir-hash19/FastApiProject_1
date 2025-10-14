@@ -3,6 +3,7 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from fastapi import Request
 from core.utils.i18n import get_translator, DEFAULT_LANG, SUPPORTED_LANGS
 
+
 class LocalizationMiddleware(BaseHTTPMiddleware):
     """
     Middleware برای تشخیص زبان کاربر از Header یا Query
@@ -29,6 +30,3 @@ class LocalizationMiddleware(BaseHTTPMiddleware):
         response = await call_next(request)
         response.headers["Content-Language"] = lang
         return response
-
-
-        

@@ -4,7 +4,6 @@ from core.users.routes import router as usersrouter
 from fastapi import FastAPI
 
 
-
 app = FastAPI(
     title="Payment Manager API",
     description="""
@@ -18,12 +17,11 @@ app = FastAPI(
     },
     license_info={
         "name": "MIT",
-        
     },
     openapi_tags=[
         {
             "name": "Payments",
-            "description": "managing CRUD operations for payments objects"
+            "description": "managing CRUD operations for payments objects",
         }
     ],
 )
@@ -34,5 +32,3 @@ app.add_middleware(LocalizationMiddleware)
 # اضافه کردن روت‌ها
 app.include_router(usersrouter, tags=["users"])
 app.include_router(paymentsrouter, tags=["payments"])
-
-

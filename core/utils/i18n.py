@@ -12,6 +12,7 @@ DEFAULT_LANG = "en"
 # زبان‌های پشتیبانی‌شده
 SUPPORTED_LANGS = ["en", "fa"]
 
+
 def get_language_from_request(request: Request) -> str:
     """
     تشخیص زبان از QueryParam یا Header
@@ -23,6 +24,7 @@ def get_language_from_request(request: Request) -> str:
     if lang not in SUPPORTED_LANGS:
         lang = DEFAULT_LANG
     return lang
+
 
 def get_translator(lang: str):
     """
@@ -38,6 +40,7 @@ def get_translator(lang: str):
         gettext.install("messages", localedir=LOCALES_DIR)
         _ = gettext.gettext
     return _
+
 
 async def get_text_function(request: Request):
     """

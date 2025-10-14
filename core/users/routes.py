@@ -11,17 +11,19 @@ import random
 
 from .schemas import UserBaseSchema, UserloginSchema, DeleteAccountSchema
 
+from core.utils.i18n import get_text_function
+
 router = APIRouter(prefix="/api/v1")    
 
 
 
 """the endpoint will created an account for user and assign tokens"""
 @router.post("/register")
-async def user_register(request: UserBaseSchema,db:Session = Depends(get_db)):
+async def user_register(request: UserBaseSchema,db:Session = Depends(get_db),gettext_func = Depends(get_text_function) ):
     if db.query(User).filter_by(email=request.email.lower()).first():
                 raise HTTPException(
                      status_code=status.HTTP_409_CONFLICT, detail="email already exists")
-    
+    _ = gettext_func
     user_obj = User(email=request.email.lower(),
             full_name=request.full_name,
             national_id=request.national_id)  
@@ -35,7 +37,7 @@ async def user_register(request: UserBaseSchema,db:Session = Depends(get_db)):
 
     return JSONResponse(
             content={
-                "detail": "user registered successfully",
+                "detail": _("user registered successfully"),
                 "access": access_token,
                 "refresh": refresh_token,
             },

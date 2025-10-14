@@ -1,0 +1,2 @@
+msgid "user registered successfully"
+msgstr "کاربر با موفقیت ثبت‌نام شد"

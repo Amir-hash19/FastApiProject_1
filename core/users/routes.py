@@ -43,7 +43,6 @@ async def user_register(
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT, detail="email already exists"
         )
-    _ = gettext_func
     user_obj = User(
         email=request.email.lower(),
         full_name=request.full_name,
@@ -59,7 +58,7 @@ async def user_register(
 
     return JSONResponse(
         content={
-            "detail": _("user registered successfully"),
+            "detail": "user registered successfully",
             "access": access_token,
             "refresh": refresh_token,
         },

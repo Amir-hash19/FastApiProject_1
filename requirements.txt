@@ -49,6 +49,7 @@ websockets==15.0.1
 passlib[bcrypt]
 pyjwt==2.10.0
 fastapi-cache2==0.2.2
+pytest==8.4.2
 argon2-cffi
 flake8
 black

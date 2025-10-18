@@ -1,7 +1,9 @@
 from core.middlewares.i18n_middleware import LocalizationMiddleware
+from core.payments.exceptions import NotFoundErrorException
 from core.payments.routes import router as paymentsrouter
 from core.users.routes import router as usersrouter
-from fastapi import FastAPI
+from fastapi.responses import JSONResponse 
+from fastapi import FastAPI, Request, status
 
 
 app = FastAPI(
@@ -26,7 +28,19 @@ app = FastAPI(
     ],
 )
 
-app.add_middleware(LocalizationMiddleware)
+# app.add_middleware(LocalizationMiddleware)
+
+
+@app.exception_handler(NotFoundErrorException)
+async def payment_not_found_handler(request: Request, exc:NotFoundErrorException):
+    return JSONResponse(
+        status_code=status.HTTP_404_NOT_FOUND,
+        content={
+            "status":"Payment Not Found",
+            "message":exc.message
+        }
+    )
+
 
 
 # اضافه کردن روت‌ها

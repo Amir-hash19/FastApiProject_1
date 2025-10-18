@@ -22,6 +22,7 @@ from typing import List
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
 from core.database import get_db
+from core.payments.exceptions import NotFoundErrorException
 import random
 
 from .schemas import (
@@ -53,7 +54,7 @@ async def retrieve_payment_list(
     return payments
 
 
-@router.post("/payment", response_model=PaymentResponseSchema)
+@router.post("/payment", response_model=PaymentResponseSchema, status_code=status.HTTP_201_CREATED)
 async def create_payment(
     payment_data: PaymentCreateSchema,
     request: Request,
@@ -61,7 +62,7 @@ async def create_payment(
     user: User = Depends(get_authenticated_user),
 ):
     """this endpoint will create a payement object for user"""
-    _ = request.state.translations.gettext
+
     try:
         data = payment_data.model_dump()
         data.update({"user_id": user.id})
@@ -71,14 +72,17 @@ async def create_payment(
         db.refresh(payment)
 
         return {
-            "message": _("Payment created successfully."),
-            "payment": payment,
+            "message": "Payment created successfully",
+            "id": payment.id,
+            "amount": payment.amount,
+            "created_at": payment.created_at,
+            "description": payment.description
         }
     except Exception:
         db.rollback()
         raise HTTPException(
             status_code=500,
-            detail=_("Failed to create payment. Please try again later."),
+            detail="Failed to create payment. Please try again later.",
         )
 
 
@@ -94,11 +98,12 @@ async def retrieve_payment(
         .first()
     )
 
+    """write an custom exception handler for payment"""
     if not payment_obj:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Payment not found"
-        )
+        raise NotFoundErrorException(payment_id)
     return payment_obj
+
+
 
 
 @router.delete("/payments/{payment_id}", status_code=status.HTTP_204_NO_CONTENT)
@@ -112,14 +117,15 @@ async def delete_payment(
         .filter(Payment.id == payment_id, Payment.user_id == user.id)
         .first()
     )
-
     if not del_payment:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Payment not found"
-        )
+        raise NotFoundErrorException(payment_id)
+
     db.delete(del_payment)
     db.commit()
-    return JSONResponse(content={"detail": "Payment deleted Successfully"})
+    return {"status": "Payment deleted Successfull"}  
+
+
+
 
 
 @router.put("/payments/{payment_id}", response_model=PaymentSchema)
@@ -136,11 +142,9 @@ async def update_payment(
         .filter(Payment.id == payment_id, Payment.user_id == user.id)
         .first()
     )
-
+    """write an custom exception handler for payment"""
     if not payment_obj:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Payment not found"
-        )
+        raise NotFoundErrorException(payment_id)
 
     if payment_data.amount is not None:
         payment_obj.amount = payment_data.amount

@@ -50,6 +50,8 @@ passlib[bcrypt]
 pyjwt==2.10.0
 fastapi-cache2==0.2.2
 pytest==8.4.2
+celery
+celery[redis]
 argon2-cffi
 flake8
 black

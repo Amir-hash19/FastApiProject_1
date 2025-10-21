@@ -1,7 +1,5 @@
 # 🎓 Payment managment  – FastAPI Modular Backend
 
-![Demo](https://media.gifdb.com/programming-stick-figure-going-crazy-on-fire-j6ii4pju9xdtnsbr.gif)
-
 
 PaymentManager is a **modern, scalable backend** built with [FastAPI](https://fastapi.tiangolo.com/)  
 designed using a **modular architecture** — each app (Users, Payments)  

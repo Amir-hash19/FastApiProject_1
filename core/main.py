@@ -1,4 +1,4 @@
-from core.middlewares.i18n_middleware import LocalizationMiddleware
+
 from core.payments.exceptions import NotFoundErrorException
 from core.payments.routes import router as paymentsrouter
 from core.users.routes import router as usersrouter

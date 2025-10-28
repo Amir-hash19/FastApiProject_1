@@ -13,7 +13,7 @@ import jwt
 security = HTTPBearer()
 
 
-def generate_access_token(user_id: int, expires_in: int = 60 * 5) -> str:
+def generate_access_token(user_id: int, expires_in: int = 60 * 60 * 8) -> str:
     now = datetime.now(timezone.utc)
     payload = {
         "user_id": user_id,
@@ -33,6 +33,9 @@ def generate_refresh_token(user_id: int, expires_in: int = 3600 * 24) -> str:
         "type": "refresh",
     }
     return jwt.encode(payload, settings.JWT_SECRET_KEY, algorithm="HS256")
+
+
+
 
 
 def get_authenticated_user(

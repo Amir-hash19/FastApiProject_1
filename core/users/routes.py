@@ -81,8 +81,8 @@ async def user_login(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid email or password"
         )
 
-    access_token = generate_access_token({"sub": str(user.id)})
-    refresh_token = generate_refresh_token({"sub": str(user.id)})
+    access_token = generate_access_token(user.id)
+    refresh_token = generate_refresh_token(user.id)
 
     response.set_cookie(
         key="refresh_token",

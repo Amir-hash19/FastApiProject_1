@@ -3,7 +3,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
     SQLALCHEMY_DATABASE_URL: str
-    JWT_SECRET_KEY: str = "test"
+    JWT_SECRET_KEY: str 
     REDIS_URL: str = "redis://localhost:6379"
 
 

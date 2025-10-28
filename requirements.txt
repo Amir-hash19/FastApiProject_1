@@ -56,3 +56,4 @@ argon2-cffi
 flake8
 black
 pytest
+locust

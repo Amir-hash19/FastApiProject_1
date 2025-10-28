@@ -35,3 +35,5 @@ class PaymentUser(HttpUser):
             }
         )
         print(response.status_code, response.text)
+
+    

@@ -3,17 +3,29 @@ version: "3.9"
 services:
   web:
     build: .
+    container_name: fastapi_app
     ports:
       - "8000:8000"
     env_file:
       - .env
     depends_on:
       - redis
-      
+    command: uvicorn core.main:app --host 0.0.0.0 --port 8000
+    volumes:
+      - .:/usr/src/core
+      - ./test.db:/test.db 
+    networks:
+      - app_net
+
   redis:
     image: redis:7
+    container_name: redis_service
     ports:
       - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - app_net
 
   celery_worker:
     build:
@@ -22,12 +34,34 @@ services:
     container_name: celery_worker
     restart: always
     environment:
-      REDIS_URL: redis://redis:6379
+      - REDIS_URL=redis://redis:6379
     volumes:
       - .:/usr/src/core
     depends_on:
       - redis
     command: bash -c "celery -A core.celery_conf.celery_app worker --loglevel=info"
+    networks:
+      - app_net
+
+  locust:
+    image: locustio/locust:latest
+    container_name: locust_service
+    ports:
+      - "8089:8089"
+    volumes:
+      - ./:/mnt/locust
+    command: >
+      -f /mnt/locust/locustfile.py
+      --host http://web:8000
+    depends_on:
+      - web
+    networks:
+      - app_net
+
 
 volumes:
   redis_data:
+
+networks:
+  app_net:
+    driver: bridge
